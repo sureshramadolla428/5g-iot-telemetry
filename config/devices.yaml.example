@@ -1,0 +1,21 @@
+# Example device map. Copy to config/devices.yaml (gitignored locally if you add secrets).
+# BIND_MODE=5g REQUIRES an explicit source_ip for every device. The simulator
+# will refuse to start if source_ip is missing or set to "auto".
+# It will NEVER pick the first uesimtunN interface for you.
+#
+# Discover tunnel IPs read-only:
+#   bash scripts/check_ue_tunnels.sh
+#
+# Replace placeholders with YOUR UERANSIM UE addresses (no repo-hardcoded hosts).
+
+# Direct-mode fleet (50–100 app UEs) — set DEVICE_COUNT=50 with BIND_MODE=direct.
+# Do not set count>mapped devices in BIND_MODE=5g (this k8s lab has two tunnels).
+# count: 50
+
+devices:
+  - device_id: iot-001
+    interface: uesimtun0
+    source_ip: REPLACE_WITH_UE_TUNNEL_IP
+  - device_id: iot-002
+    interface: uesimtun1
+    source_ip: REPLACE_WITH_UE_TUNNEL_IP

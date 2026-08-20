@@ -1,0 +1,52 @@
+# Radio / KPI model. Default: terrestrial UMa-ish. NTN and A2G are OFF.
+# All RF outputs are source=modeled (UERANSIM has no PHY).
+# Enable at most one of enable_ntn / enable_a2g.
+
+profile: terrestrial
+enable_ntn: false
+enable_a2g: false
+
+freq_hz: 3500000000          # 3.5 GHz
+bandwidth_hz: 20000000       # 20 MHz
+scs_khz: 30
+numerology: 1
+noise_figure_db: 7.0         # UE NF; N ≈ -174 + 10log10(BW) + NF ≈ -94 dBm @ 20 MHz
+n_prb: 51
+n_re: 6732                   # n_prb * 12 * 11 (approx PDSCH REs)
+layers: 1
+cqi_table: 1
+p_tx_dbm: 23.0
+g_tx_dbi: 8.0
+g_rx_dbi: 0.0
+l_feeder_db: 0.0
+l_rx_db: 0.0
+distance_2d_m: 400.0         # UMa LOS ~400 m → per-RE RSRP ~-90 dBm (not wideband P_rx)
+h_bs_m: 25.0
+h_ut_m: 1.5
+velocity_mps: 3.0
+delay_spread_s: 0.000001
+interference_over_noise_db: 15.0  # loaded cell: SINR ≈ SNR - 10log10(1+I/N) ~ 12–15 dB
+bler_target: 0.1
+max_harq_tx: 4
+latency_budget_ms: 50.0
+t_proc_ms: 4.0
+t_queue_ms: 2.0
+t_tx_ms: 0.5
+clocks_synced: false         # OWD stays null unless true
+
+# NTN (used only if enable_ntn: true)
+orbit: GEO                   # LEO | MEO | GEO
+altitude_km: 35786
+elevation_deg: 90
+eirp_dbw: 50.0
+t_sys_k: 150.0
+rain_loss_db: 0.0
+gas_loss_db: 0.5
+scintillation_db: 0.0
+cn0_required_dbhz: 50.0
+
+# A2G (used only if enable_a2g: true)
+aircraft_alt_m: 300.0
+gs_alt_m: 1.5
+along_track_m: -2000.0       # negative = approach (positive Doppler)
+allow_beyond_horizon: false

@@ -1,0 +1,268 @@
+name: 5g-iot-telemetry
+
+# Isolated demo stack. Never uses network_mode: host.
+# Start: docker compose -p 5g-iot-telemetry up -d
+# Extras (Kafka + RabbitMQ): --profile extras
+
+services:
+  mosquitto-init:
+    image: eclipse-mosquitto:2.0.20
+    container_name: 5g-iot-telemetry-mosquitto-init
+    restart: "no"
+    user: "0:0"
+    environment:
+      MQTT_USERNAME: ${MQTT_USERNAME}
+      MQTT_PASSWORD: ${MQTT_PASSWORD}
+    volumes:
+      - mosquitto-config:/mosquitto/config
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        mkdir -p /mosquitto/config
+        mosquitto_passwd -b -c /mosquitto/config/passwd "$$MQTT_USERNAME" "$$MQTT_PASSWORD"
+        chown -R 1883:1883 /mosquitto/config/passwd
+        chmod 0400 /mosquitto/config/passwd
+    networks:
+      iot-net:
+        ipv4_address: 172.31.240.9
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: "0.10"
+
+  mosquitto:
+    image: eclipse-mosquitto:2.0.20
+    container_name: 5g-iot-telemetry-mosquitto
+    restart: unless-stopped
+    user: "1883:1883"
+    environment:
+      MQTT_USERNAME: ${MQTT_USERNAME}
+      MQTT_PASSWORD: ${MQTT_PASSWORD}
+    depends_on:
+      mosquitto-init:
+        condition: service_completed_successfully
+    ports:
+      - "${MQTT_HOST_PORT:-18830}:1883"
+    volumes:
+      # Named volume holds passwd. It can also shadow/copy mosquitto.conf.
+      # After changing config/mosquitto/mosquitto.conf, recreate ONLY
+      # 5g-iot-telemetry_mosquitto_config (never 5g-iot-telemetry_timescaledb),
+      # then rerun mosquitto-init + mosquitto so passwd is rewritten.
+      - mosquitto-config:/mosquitto/config
+      - ./config/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mosquitto_pub -h 127.0.0.1 -p 1883 -u \"$$MQTT_USERNAME\" -P \"$$MQTT_PASSWORD\" -t lab/healthcheck -m ping -q 0",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    networks:
+      iot-net:
+        ipv4_address: 172.31.240.10
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.25"
+
+  timescaledb:
+    image: timescale/timescaledb:2.17.2-pg16
+    container_name: 5g-iot-telemetry-timescaledb
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_HOST_PORT:-15432}:5432"
+    volumes:
+      - timescaledb-data:/var/lib/postgresql/data
+      - ./config/schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks:
+      iot-net:
+        ipv4_address: 172.31.240.11
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.0"
+
+  consumer:
+    build:
+      context: .
+      dockerfile: backend-consumer/Dockerfile
+    container_name: 5g-iot-telemetry-consumer
+    restart: unless-stopped
+    user: "1000:1000"
+    env_file:
+      - .env
+    environment:
+      MQTT_HOST: mosquitto
+      MQTT_PORT: "1883"
+      POSTGRES_HOST: timescaledb
+      POSTGRES_PORT: "5432"
+      CONSUMER_BIND_HOST: 0.0.0.0
+      CONSUMER_BIND_PORT: "8080"
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      AMQP_URL: ${AMQP_URL}
+      ENABLE_KAFKA_BRIDGE: ${ENABLE_KAFKA_BRIDGE:-false}
+      ENABLE_AMQP_BRIDGE: ${ENABLE_AMQP_BRIDGE:-false}
+    ports:
+      - "${CONSUMER_HEALTH_PORT:-18080}:8080"
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+      timescaledb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=3)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+    networks:
+      iot-net:
+        ipv4_address: 172.31.240.13
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.50"
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: 5g-iot-telemetry-grafana
+    restart: unless-stopped
+    user: "472:472"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: ${GF_USERS_ALLOW_SIGN_UP:-false}
+      GF_INSTALL_PLUGINS: ""
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${GRAFANA_HOST_PORT:-13000}:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./dashboard/provisioning:/etc/grafana/provisioning:ro
+      - ./dashboard/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks:
+      iot-net:
+        ipv4_address: 172.31.240.12
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.50"
+
+  kafka:
+    image: apache/kafka:3.9.0
+    container_name: 5g-iot-telemetry-kafka
+    profiles: ["extras"]
+    restart: unless-stopped
+    ports:
+      - "${KAFKA_HOST_PORT:-19092}:19092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,EXTERNAL://0.0.0.0:19092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:19092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      CLUSTER_ID: 5gIotTelemetryKRaftDemo01
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_LOG_RETENTION_HOURS: 24
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      iot-net:
+        ipv4_address: 172.31.240.20
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: "0.75"
+
+  rabbitmq:
+    image: rabbitmq:3.13.7-management-alpine
+    container_name: 5g-iot-telemetry-rabbitmq
+    profiles: ["extras"]
+    restart: unless-stopped
+    hostname: rabbitmq
+    ports:
+      - "${RABBITMQ_AMQP_HOST_PORT:-15672}:5672"
+      - "${RABBITMQ_MGMT_HOST_PORT:-15673}:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    networks:
+      iot-net:
+        ipv4_address: 172.31.240.21
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+          cpus: "0.50"
+
+networks:
+  iot-net:
+    name: 5g-iot-telemetry_iot-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${DOCKER_SUBNET:-172.31.240.0/24}
+          gateway: ${DOCKER_GATEWAY:-172.31.240.1}
+
+volumes:
+  timescaledb-data:
+    name: 5g-iot-telemetry_timescaledb
+  mosquitto-data:
+    name: 5g-iot-telemetry_mosquitto_data
+  mosquitto-log:
+    name: 5g-iot-telemetry_mosquitto_log
+  mosquitto-config:
+    name: 5g-iot-telemetry_mosquitto_config
+  grafana-data:
+    name: 5g-iot-telemetry_grafana
+  kafka-data:
+    name: 5g-iot-telemetry_kafka
+  rabbitmq-data:
+    name: 5g-iot-telemetry_rabbitmq

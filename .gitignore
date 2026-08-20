@@ -1,0 +1,42 @@
+# Secrets and local env
+.env
+!.env.example
+config/devices.yaml
+*.pem
+*.key
+passwd
+passwd.generated
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Local data volumes
+data/
+*.sqlite3
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log
+logs/
+
+# Operator helpers: private companion repo 5g-iot-telemetry-scripts
+# Keep local copies on disk; do not publish them.
+/private/
+/scripts/

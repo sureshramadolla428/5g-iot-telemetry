@@ -1,0 +1,19 @@
+[project]
+name = "5g-iot-telemetry"
+version = "1.0.0"
+description = "Isolated 5G IoT telemetry demo (UERANSIM user-plane + MQTT + TimescaleDB + Grafana)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+[tool.pytest.ini_options]
+pythonpath = ["shared", "ue-simulator/src", "backend-consumer/src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["shared", "ue-simulator/src", "backend-consumer/src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "W"]

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/5g-iot-telemetry/payload.schema.json",
+  "title": "IoTDeviceTelemetry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "device_id",
+    "timestamp",
+    "temperature",
+    "humidity",
+    "battery",
+    "latitude",
+    "longitude",
+    "status"
+  ],
+  "properties": {
+    "device_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "timestamp": { "type": "string" },
+    "temperature": { "type": "number", "minimum": -40, "maximum": 85 },
+    "humidity": { "type": "number", "minimum": 0, "maximum": 100 },
+    "battery": { "type": "number", "minimum": 0, "maximum": 100 },
+    "latitude": { "type": "number", "minimum": -90, "maximum": 90 },
+    "longitude": { "type": "number", "minimum": -180, "maximum": 180 },
+    "status": { "type": "string", "enum": ["online", "offline", "degraded"] },
+    "source_ip": { "type": ["string", "null"] },
+    "schema_version": { "type": "string" },
+    "sequence_number": { "type": ["integer", "null"], "minimum": 0 },
+    "radio": {
+      "type": "object",
+      "description": "RF KPIs. Always source=modeled in this lab (no UERANSIM PHY)."
+    },
+    "measured": {
+      "type": "object",
+      "description": "App/path KPIs from MQTT, clocks, and read-only iface counters."
+    }
+  }
+}

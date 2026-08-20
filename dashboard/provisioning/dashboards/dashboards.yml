@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: 5g-iot-telemetry
+    orgId: 1
+    folder: 5G IoT
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false
