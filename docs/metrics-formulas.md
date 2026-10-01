@@ -9,7 +9,7 @@ Single implementation: `shared/metrics/`. Simulator, consumer, tests, SQL views,
 | `source=modeled` | Computed from `config/radio_model.yaml` (link budget + channel). UERANSIM has **no PHY**. | RSRP, RSRQ, RSSI, SS-SINR, CQI, MCS, TBS, path loss, Doppler, L_UP, NTN C/N0, A2G two-ray |
 | `source=measured` | Observed on the MQTT/app path or read-only OS counters | Echo RTT, RFC 3550 jitter, PDR/PLR, sequence gaps/dups/reorders, message rate, DB ingest lag, `/proc/net/dev` bytes |
 
-Pydantic rejects PHY fields tagged `measured`. Grafana modeled panels include the visible note **modeled — not radio-measured**. Constant: `metrics.constants.MODELED_DISCLAIMER`.
+Pydantic rejects PHY fields tagged `measured`. Grafana modeled panels include the visible note **modeled - not radio-measured**. Constant: `metrics.constants.MODELED_DISCLAIMER`.
 
 A later SDR/srsRAN/COTS integration should implement `metrics.radio.base.RadioModel` and may then emit `source=measured` for true radio quantities. Until then, RF stays modeled.
 
@@ -18,12 +18,12 @@ A later SDR/srsRAN/COTS integration should implement `metrics.radio.base.RadioMo
 - \(c = 299792458\) m/s
 - \(k = 1.380649 \times 10^{-23}\) J/K
 - \(T_0 = 290\) K
-- \(N_0 = -174\) dBm/Hz (conventional; \(k T_0\) is ≈ −173.98 dBm/Hz)
+- \(N_0 = -174\) dBm/Hz (conventional; \(k T_0\) is  -173.98 dBm/Hz)
 - \(R_E = 6371\) km, \(k_{\mathrm{eff}} = 4/3\)
-- GEO altitude \(35786\) km (nadir one-way delay ≈ **119 ms**)
+- GEO altitude \(35786\) km (nadir one-way delay  **119 ms**)
 - Default LEO 550 km, MEO 20000 km (YAML)
 
-## Conversions — never average in dB
+## Conversions - never average in dB
 
 - \(\mathrm{mW} = 10^{\mathrm{dBm}/10}\), \(\mathrm{dBm} = 10\log_{10}(\mathrm{mW})\)
 - Power ratio: \(10^{x/10}\); amplitude: \(10^{x/20}\)
@@ -42,7 +42,7 @@ A later SDR/srsRAN/COTS integration should implement `metrics.radio.base.RadioMo
 
 - \(\mathrm{RSRQ} = N \cdot \mathrm{RSRP}/\mathrm{RSSI}\) (linear)
 - Identity: \(\mathrm{RSRQ}_{dB} = \mathrm{RSRP}_{dBm} - \mathrm{RSSI}_{dBm} + 10\log_{10} N\)
-- SS-RSRP report range −156…−31 dBm; SS-RSRQ −43…20 dB; SS-SINR −23…40 dB (quantized)
+- SS-RSRP report range -156...-31 dBm; SS-RSRQ -43...20 dB; SS-SINR -23...40 dB (quantized)
 
 ## Link budget and path loss
 
@@ -55,8 +55,8 @@ A later SDR/srsRAN/COTS integration should implement `metrics.radio.base.RadioMo
 ## CQI / MCS / TBS
 
 - CQI tables 1/2/3 and MCS Table 5.1.3.1-1 are **data tuples**, not if-chains
-- TBS: TS 38.214 §5.1.3.2 including Table 5.1.3.2-1
-- **Approximation:** SINR→CQI picks the highest tabulated efficiency \(\le \log_2(1+\mathrm{SINR}_{\mathrm{lin}})\) (Shannon). 3GPP does not specify a unique mapping.
+- TBS: TS 38.214 5.1.3.2 including Table 5.1.3.2-1
+- **Approximation:** SINR->CQI picks the highest tabulated efficiency \(\le \log_2(1+\mathrm{SINR}_{\mathrm{lin}})\) (Shannon). 3GPP does not specify a unique mapping.
 
 ## HARQ
 
@@ -89,7 +89,7 @@ A later SDR/srsRAN/COTS integration should implement `metrics.radio.base.RadioMo
 
 ## NTN (`enable_ntn: true` or `ENABLE_NTN_MODEL=true`)
 
-Modeled only. Slant range, delays, orbit-speed Doppler, G/T, C/N0, rain/gas/scintillation losses. GEO nadir OWD ≈ 119 ms. Does **not** edit any NTN lab repo.
+Modeled only. Slant range, delays, orbit-speed Doppler, G/T, C/N0, rain/gas/scintillation losses. GEO nadir OWD  119 ms. Does **not** edit any NTN lab repo.
 
 ## A2G (`enable_a2g: true` or `ENABLE_A2G_MODEL=true`)
 

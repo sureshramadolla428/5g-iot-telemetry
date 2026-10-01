@@ -33,16 +33,16 @@ Single schema file: `config/schema.sql`.
 - `telemetry` hypertable, index `(device_id, timestamp DESC)`, linear-power RF columns, views `v_rsrp_avg` / `v_kpi_modeled` / `v_kpi_measured`
 - Echo RTT hypertable; `device_flow_kpis` for PDR/gap/dup/reorder
 - compression after 7 days, retention 30 days (example policies)
-- malformed MQTT payloads → `dead_letter` (consumer does not crash)
+- malformed MQTT payloads -> `dead_letter` (consumer does not crash)
 
 ## Health
 
-- `GET /health` — process up
-- `GET /ready` — DB ping + MQTT connected
-- `GET /metrics` — counters (ok, dead letter, batches, bridges)
+- `GET /health` - process up
+- `GET /ready` - DB ping + MQTT connected
+- `GET /metrics` - counters (ok, dead letter, batches, bridges)
 
 ## Failure handling
 
-- MQTT keepalive default 120s, exponential reconnect backoff (1s…60s)
+- MQTT keepalive default 120s, exponential reconnect backoff (1s...60s)
 - Consumer validation errors increment dead-letter counters
 - Kafka/AMQP init/publish errors are logged; ingest continues

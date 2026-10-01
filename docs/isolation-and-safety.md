@@ -12,7 +12,7 @@ This project is designed to run on a workstation that already hosts Open5GS, UER
 
 ## What they must never do
 
-- Edit sibling directories (`github-ueransim-open5gs`, `5g-ntn-emulation-lab`, `URRANSIM_Open5gs`, `3GPP-RAG`, …)
+- Edit sibling directories (`github-ueransim-open5gs`, `5g-ntn-emulation-lab`, `URRANSIM_Open5gs`, `3GPP-RAG`, ...)
 - `systemctl` start/stop of core or RAN
 - `kill` / `pkill` of `nr-gnb`, `nr-ue`, `open5gs-*`
 - `iptables-restore` of a full table, or adding rules (except the optional human-applied commands in `manual-host-changes.md`)

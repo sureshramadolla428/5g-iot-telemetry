@@ -22,7 +22,7 @@ Formulas: [`docs/metrics-formulas.md`](metrics-formulas.md).
   "source_ip": "10.45.0.2",
   "radio": {
     "source": "modeled",
-    "disclaimer": "modeled — not radio-measured",
+    "disclaimer": "modeled - not radio-measured",
     "rsrp_dbm": -88.1,
     "rsrp_mw": 1.55e-9,
     "rsrq_db": -10.2,

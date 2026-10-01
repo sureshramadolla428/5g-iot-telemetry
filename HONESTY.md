@@ -1,4 +1,4 @@
-# Honesty contract — 5G IoT telemetry
+# Honesty contract - 5G IoT telemetry
 
 This lab is an **isolated MQTT telemetry demo** (Mosquitto, TimescaleDB, Grafana, host Python simulator). It can optionally bind sockets to an **existing** UERANSIM tunnel. It is **not** an ATG/NTN RAN, and it does **not** install a 5G core.
 
@@ -6,7 +6,7 @@ This lab is an **isolated MQTT telemetry demo** (Mosquitto, TimescaleDB, Grafana
 
 | Item | Fact |
 |---|---|
-| Bind | `BIND_MODE=direct` — **not** 5G user plane |
+| Bind | `BIND_MODE=direct` - **not** 5G user plane |
 | MQTT | `127.0.0.1:18830` |
 | Devices | **2** (`iot-001`, `iot-002`) |
 | RF | Modeled (`terrestrial_uma`), not measured |

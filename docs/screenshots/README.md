@@ -2,7 +2,7 @@
 
 PNGs here are for the GitHub README. They are **not** required for CI. Captions below match what the captures actually show.
 
-**Do not claim** NTN/ATG, a 50–100 UE fleet, or UERANSIM `uesimtun` user-plane tunnels in these shots.
+**Do not claim** NTN/ATG, a 50-100 UE fleet, or UERANSIM `uesimtun` user-plane tunnels in these shots.
 
 Keep images unannotated with internal hostnames if you share the repo publicly.
 

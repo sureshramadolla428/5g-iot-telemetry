@@ -8,12 +8,12 @@ Create extra subscribers **yourself** in your existing core, using a range that 
 
 | Field | Suggested dedicated value | Notes |
 |---|---|---|
-| IMSI range | `999700000000301`–`999700000000320` | Pick a block unused by other labs |
+| IMSI range | `999700000000301`-`999700000000320` | Pick a block unused by other labs |
 | DNN / APN | `iot` | Separate from `internet` / NTN DNNs if possible |
 | SST / SD | eMBB or a dedicated IoT SST you already use | Do not edit slice YAML from this repo |
 | UE count | Match `config/devices.yaml` entries | One tunnel IP per `device_id` |
 
-**Do not** run subscriber-import scripts from this repository — there are none on purpose.
+**Do not** run subscriber-import scripts from this repository - there are none on purpose.
 
 ## Explicit source bind
 

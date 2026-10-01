@@ -1,6 +1,6 @@
-﻿# 5G IoT Telemetry Lab
+# 5G IoT Telemetry Lab
 
-### Isolated MQTT ingest â€” Mosquitto, TimescaleDB, Grafana (host ports 18830 / 13000)
+### Isolated MQTT ingest " Mosquitto, TimescaleDB, Grafana (host ports 18830 / 13000)
 
 ![MQTT](https://img.shields.io/badge/MQTT-Mosquitto-3C5280)
 ![TimescaleDB](https://img.shields.io/badge/TimescaleDB-iot-336791)
@@ -31,7 +31,7 @@ Two bind modes:
 
 | Mode | What it is |
 |---|---|
-| **`BIND_MODE=direct`** (captured demo) | Simulator â†’ Mosquitto on **localhost:18830**. **Not** 5G user plane. |
+| **`BIND_MODE=direct`** (captured demo) | Simulator ' Mosquitto on **localhost:18830**. **Not** 5G user plane. |
 | **`BIND_MODE=5g`** (optional) | Simulator binds an **explicit** `uesimtunN` source IP you put in `config/devices.yaml`. Core/RAN stay in **other** labs; this repo does not edit them. |
 
 **Who it's for:** application-path ingest, Grafana panels, and a careful optional bind onto an existing UERANSIM tunnel.
@@ -76,19 +76,19 @@ Geomap / KPI crops are not in this pack yet (placeholders listed in `docs/screen
 
 ```
 5g-iot-telemetry/
-â”œâ”€â”€ README.md
-â”œâ”€â”€ HONESTY.md
-â”œâ”€â”€ LICENSE
-â”œâ”€â”€ docker-compose.yml
-â”œâ”€â”€ ue-simulator/            # host Python publisher
-â”œâ”€â”€ backend-consumer/        # MQTT ingest â†’ TimescaleDB
-â”œâ”€â”€ dashboard/               # Grafana provisioning
-â”œâ”€â”€ config/                  # schema, Mosquitto, radio model
-â”œâ”€â”€ shared/
-â”œâ”€â”€ docs/
-â”‚   â”œâ”€â”€ screenshots/
-â”‚   â””â”€â”€ ...
-â””â”€â”€ tests/
+""" README.md
+""" HONESTY.md
+""" LICENSE
+""" docker-compose.yml
+""" ue-simulator/ # host Python publisher
+""" backend-consumer/ # MQTT ingest ' TimescaleDB
+""" dashboard/ # Grafana provisioning
+""" config/ # schema, Mosquitto, radio model
+""" shared/
+""" docs/
+"' """ screenshots/
+"' """" ...
+"""" tests/
 ```
 
 Operator bash helpers (`scripts/`, `private/`) are **not** in this public tree. They live in [`5g-iot-telemetry-scripts`](https://github.com/sureshramadolla428/5g-iot-telemetry-scripts) (private).
@@ -117,30 +117,30 @@ Use a **different IMSI range, DNN, and slice** if you attach extra UEs for a 5G-
 
 ```mermaid
 flowchart LR
-  subgraph host["Linux host (UERANSIM already running elsewhere)"]
-    UE["UE simulator\nBIND_MODE=5g\nsocket.bind(src_ip, 0)"]
-    TUN["uesimtunN\nexplicit source IP"]
-    UE --> TUN
-  end
-  subgraph upf["Existing 5G core / UPF (untouched)"]
-    GTP["GTP-U / N3 / N6"]
-  end
-  subgraph stack["Compose project 5g-iot-telemetry\nbridge 172.31.240.0/24"]
-    MQTT["Mosquitto :1883\nhost 18830"]
-    CONS["Backend consumer"]
-    TS["TimescaleDB"]
-    GF["Grafana :3000\nhost 13000"]
-    MQTT --> CONS --> TS --> GF
-  end
-  TUN --> GTP --> MQTT
+ subgraph host["Linux host (UERANSIM already running elsewhere)"]
+ UE["UE simulator\nBIND_MODE=5g\nsocket.bind(src_ip, 0)"]
+ TUN["uesimtunN\nexplicit source IP"]
+ UE --> TUN
+ end
+ subgraph upf["Existing 5G core / UPF (untouched)"]
+ GTP["GTP-U / N3 / N6"]
+ end
+ subgraph stack["Compose project 5g-iot-telemetry\nbridge 172.31.240.0/24"]
+ MQTT["Mosquitto :1883\nhost 18830"]
+ CONS["Backend consumer"]
+ TS["TimescaleDB"]
+ GF["Grafana :3000\nhost 13000"]
+ MQTT --> CONS --> TS --> GF
+ end
+ TUN --> GTP --> MQTT
 ```
 
-Direct-mode fallback (what the screenshots show â€” no tunnels, no core):
+Direct-mode fallback (what the screenshots show " no tunnels, no core):
 
 ```mermaid
 flowchart LR
-  SIM["UE simulator\nBIND_MODE=direct"] --> MQTT["Mosquitto localhost:18830"]
-  MQTT --> CONS["Consumer"] --> TS["TimescaleDB"] --> GF["Grafana :13000"]
+ SIM["UE simulator\nBIND_MODE=direct"] --> MQTT["Mosquitto localhost:18830"]
+ MQTT --> CONS["Consumer"] --> TS["TimescaleDB"] --> GF["Grafana :13000"]
 ```
 
 ---
@@ -175,7 +175,7 @@ BIND_MODE=direct MQTT_HOST=127.0.0.1 MQTT_PORT=18830 python -m ue_simulator
 
 Day-of wrappers (`run.sh`, `stop.sh`, `sim-direct.sh`, setup preflight) are in the private companion [`5g-iot-telemetry-scripts`](https://github.com/sureshramadolla428/5g-iot-telemetry-scripts). Copy `scripts/` and `private/` from that repo into this checkout if you have access.
 
-**5G path:** copy `config/devices.yaml.example` â†’ `config/devices.yaml`, put **your** UE tunnel IPv4 in `source_ip` (never `auto`), set `MQTT_HOST` to an address the UE user-plane can reach, `BIND_MODE=5g`, then run the simulator **on the UERANSIM host**. See [docs/5g-integration.md](docs/5g-integration.md).
+**5G path:** copy `config/devices.yaml.example` ' `config/devices.yaml`, put **your** UE tunnel IPv4 in `source_ip` (never `auto`), set `MQTT_HOST` to an address the UE user-plane can reach, `BIND_MODE=5g`, then run the simulator **on the UERANSIM host**. See [docs/5g-integration.md](docs/5g-integration.md).
 
 ### Ports
 

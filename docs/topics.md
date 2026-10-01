@@ -14,7 +14,7 @@ iot/devices/{device_id}/echo
 
 - `iot/devices/+/telemetry`
 - `iot/devices/+/status`
-- `iot/devices/+/echo` (ping → pong for measured RTT; not retained)
+- `iot/devices/+/echo` (ping -> pong for measured RTT; not retained)
 
 ## QoS
 
